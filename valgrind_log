@@ -1,0 +1,26 @@
+==23962== Memcheck, a memory error detector
+==23962== Copyright (C) 2002-2009, and GNU GPL'd, by Julian Seward et al.
+==23962== Using Valgrind-3.6.0.SVN-Debian and LibVEX; rerun with -h for copyright info
+==23962== Command: ./live555MediaServer
+==23962== Parent PID: 23961
+==23962== 
+==23962== 
+==23962== HEAP SUMMARY:
+==23962==     in use at exit: 100 bytes in 1 blocks
+==23962==   total heap usage: 1 allocs, 0 frees, 100 bytes allocated
+==23962== 
+==23962== 100 bytes in 1 blocks are possibly lost in loss record 1 of 1
+==23962==    at 0x4024F20: malloc (vg_replace_malloc.c:236)
+==23962==    by 0x40F6C04: __cxa_allocate_exception (in /usr/lib/libstdc++.so.6.0.13)
+==23962==    by 0x8049C12: CmdFifo::CmdFifo() (CmdFifo.cpp:10)
+==23962==    by 0x804A90E: main (live555MediaServer.cpp:32)
+==23962== 
+==23962== LEAK SUMMARY:
+==23962==    definitely lost: 0 bytes in 0 blocks
+==23962==    indirectly lost: 0 bytes in 0 blocks
+==23962==      possibly lost: 100 bytes in 1 blocks
+==23962==    still reachable: 0 bytes in 0 blocks
+==23962==         suppressed: 0 bytes in 0 blocks
+==23962== 
+==23962== For counts of detected and suppressed errors, rerun with: -v
+==23962== ERROR SUMMARY: 1 errors from 1 contexts (suppressed: 18 from 7)
