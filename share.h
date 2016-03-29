@@ -26,7 +26,7 @@ extern "C"{
 
 
 #define FIFO_CMD "/tmp/cmd.fifo"
-#define FIFO_STREAM "stream_chn%d%s"
+#define FIFO_STREAM "/tmp/%d%s"
 #define CMDCharCount 20
 #define MaxChnCount 8
 

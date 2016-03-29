@@ -21,6 +21,8 @@ along with this library; if not, write to the Free Software Foundation, Inc.,
 #include "HiRTSPServer.hh"
 #include <liveMedia.hh>
 #include <string.h>
+#include "H264VideoFifoServerMediaSubsession.hh"
+
 
 HIRTSPServer*
 HIRTSPServer::createNew(UsageEnvironment& env, Port ourPort,
@@ -37,11 +39,13 @@ HIRTSPServer::HIRTSPServer(UsageEnvironment& env, int ourSocket,
 				     UserAuthenticationDatabase* authDatabase, unsigned reclamationTestSeconds)
   : RTSPServerSupportingHTTPStreaming(env, ourSocket, ourPort, authDatabase, reclamationTestSeconds)
   {
-    this->cmdFifo=new CmdFifo();
+/*     this->cmdFifo=new CmdFifo();
+	this->cmdFifo->writeSetupCmd();
+	this->cmdFifo->writePlayCmd(0); */
   }
 
 HIRTSPServer::~HIRTSPServer() {
-    delete this->cmdFifo;
+/*     delete this->cmdFifo; */
 }
 
 static ServerMediaSession* createNewSMS(UsageEnvironment& env,
@@ -49,9 +53,12 @@ static ServerMediaSession* createNewSMS(UsageEnvironment& env,
 
 ServerMediaSession* HIRTSPServer
 ::lookupServerMediaSession(char const* streamName, Boolean isFirstLookupInSession) {
-  // First, check whether the specified "streamName" exists as a local file:
-  FILE* fid = fopen(streamName, "rb");
-  Boolean fileExists = fid != NULL;
+
+	Boolean fileExists;
+	if((strncmp("/tmp/",streamName,5)== 0)&&(strncmp(".264",&streamName[6],4)== 0)&&(streamName[5]<'8')&&(streamName[5]>='0'))
+		fileExists=1;
+    else
+	    fileExists=0;
 
   // Next, check whether we already have a "ServerMediaSession" for this file:
   ServerMediaSession* sms = RTSPServer::lookupServerMediaSession(streamName);
@@ -75,11 +82,11 @@ ServerMediaSession* HIRTSPServer
     }
 
     if (sms == NULL) {
-      sms = createNewSMS(envir(), streamName, fid);
+      sms = createNewSMS(envir(), streamName, NULL);
       addServerMediaSession(sms);
     }
 
-    fclose(fid);
+    //fclose(fid);
     return sms;
   }
 }
@@ -103,7 +110,7 @@ static ServerMediaSession* createNewSMS(UsageEnvironment& env,
     // Assumed to be a H.264 Video Elementary Stream file:
     NEW_SMS("H.264 Video");
     OutPacketBuffer::maxSize = 100000; // allow for some possibly large H.264 frames
-    sms->addSubsession(H264VideoFileServerMediaSubsession::createNew(env, fileName, reuseSource));
+    sms->addSubsession(H264VideoFifoServerMediaSubsession::createNew(env, fileName, reuseSource));
   }
 
   return sms;
