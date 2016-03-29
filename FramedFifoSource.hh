@@ -27,11 +27,11 @@ along with this library; if not, write to the Free Software Foundation, Inc.,
 
 class FramedFifoSource: public FramedSource {
 protected:
-  FramedFifoSource(UsageEnvironment& env, FILE* fid); // abstract base class
+  FramedFifoSource(UsageEnvironment& env, int fid); // abstract base class
   virtual ~FramedFifoSource();
 
 protected:
-  FILE* fFid;
+  int fFid;
 };
 
 #endif

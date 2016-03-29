@@ -29,8 +29,8 @@ ByteStreamFifoSource::createNew(UsageEnvironment& env, char const* fileName,
 				unsigned preferredFrameSize,
 				unsigned playTimePerFrame)
 {
-  FILE* fid = OpenInputFifo(env, fileName);
-  if (fid == NULL) return NULL;
+  int fid = OpenInputFifo(env, fileName);
+  if (fid < 1) return NULL;
 
   ByteStreamFifoSource* newSource
     = new ByteStreamFifoSource(env, fid, preferredFrameSize, playTimePerFrame);
@@ -39,70 +39,44 @@ ByteStreamFifoSource::createNew(UsageEnvironment& env, char const* fileName,
 }
 
 ByteStreamFifoSource*
-ByteStreamFifoSource::createNew(UsageEnvironment& env, FILE* fid,
+ByteStreamFifoSource::createNew(UsageEnvironment& env, int fid,
 				unsigned preferredFrameSize,
 				unsigned playTimePerFrame) {
-  if (fid == NULL) return NULL;
+  if (fid < 1) return NULL;
 
   ByteStreamFifoSource* newSource = new ByteStreamFifoSource(env, fid, preferredFrameSize, playTimePerFrame);
 
   return newSource;
 }
 
-void ByteStreamFifoSource::seekToByteAbsolute(u_int64_t byteNumber, u_int64_t numBytesToStream) {
-  SeekFile64(fFid, (int64_t)byteNumber, SEEK_SET);
 
-  fNumBytesToStream = numBytesToStream;
-  fLimitNumBytesToStream = fNumBytesToStream > 0;
-}
-
-void ByteStreamFifoSource::seekToByteRelative(int64_t offset, u_int64_t numBytesToStream) {
-  SeekFile64(fFid, offset, SEEK_CUR);
-
-  fNumBytesToStream = numBytesToStream;
-  fLimitNumBytesToStream = fNumBytesToStream > 0;
-}
-
-void ByteStreamFifoSource::seekToEnd() {
-  SeekFile64(fFid, 0, SEEK_END);
-}
-
-ByteStreamFifoSource::ByteStreamFifoSource(UsageEnvironment& env, FILE* fid,
+ByteStreamFifoSource::ByteStreamFifoSource(UsageEnvironment& env, int fid,
 					   unsigned preferredFrameSize,
 					   unsigned playTimePerFrame)
   : FramedFifoSource(env, fid), fPreferredFrameSize(preferredFrameSize),
     fPlayTimePerFrame(playTimePerFrame), fLastPlayTime(0),
-    fHaveStartedReading(False), fLimitNumBytesToStream(False), fNumBytesToStream(0) {
-#ifndef READ_FROM_FILES_SYNCHRONOUSLY
-  makeSocketNonBlocking(fileno(fFid));
-#endif
+    fHaveStartedReading(False){
 
-  // Test whether the file is seekable
-  fFidIsSeekable = FileIsSeekable(fFid);
 }
 
 ByteStreamFifoSource::~ByteStreamFifoSource() {
-  if (fFid == NULL) return;
+  if (fFid < 1) return;
 
 #ifndef READ_FROM_FILES_SYNCHRONOUSLY
-  envir().taskScheduler().turnOffBackgroundReadHandling(fileno(fFid));
+  envir().taskScheduler().turnOffBackgroundReadHandling(fFid);
 #endif
 
   CloseInputFifo(fFid);
 }
 
 void ByteStreamFifoSource::doGetNextFrame() {
-  if (feof(fFid) || ferror(fFid) || (fLimitNumBytesToStream && fNumBytesToStream == 0)) {
-    handleClosure();
-    return;
-  }
 
 #ifdef READ_FROM_FILES_SYNCHRONOUSLY
   doReadFromFile();
 #else
   if (!fHaveStartedReading) {
     // Await readable data from the file:
-    envir().taskScheduler().turnOnBackgroundReadHandling(fileno(fFid),
+    envir().taskScheduler().turnOnBackgroundReadHandling(fFid,
 	       (TaskScheduler::BackgroundHandlerProc*)&fileReadableHandler, this);
     fHaveStartedReading = True;
   }
@@ -112,7 +86,7 @@ void ByteStreamFifoSource::doGetNextFrame() {
 void ByteStreamFifoSource::doStopGettingFrames() {
   envir().taskScheduler().unscheduleDelayedTask(nextTask());
 #ifndef READ_FROM_FILES_SYNCHRONOUSLY
-  envir().taskScheduler().turnOffBackgroundReadHandling(fileno(fFid));
+  envir().taskScheduler().turnOffBackgroundReadHandling(fFid);
   fHaveStartedReading = False;
 #endif
 }
@@ -127,27 +101,16 @@ void ByteStreamFifoSource::fileReadableHandler(ByteStreamFifoSource* source, int
 
 void ByteStreamFifoSource::doReadFromFile() {
   // Try to read as many bytes as will fit in the buffer provided (or "fPreferredFrameSize" if less)
-  if (fLimitNumBytesToStream && fNumBytesToStream < (u_int64_t)fMaxSize) {
-    fMaxSize = (unsigned)fNumBytesToStream;
-  }
+
   if (fPreferredFrameSize > 0 && fPreferredFrameSize < fMaxSize) {
     fMaxSize = fPreferredFrameSize;
   }
-#ifdef READ_FROM_FILES_SYNCHRONOUSLY
-  fFrameSize = fread(fTo, 1, fMaxSize, fFid);
-#else
-  if (fFidIsSeekable) {
-    fFrameSize = fread(fTo, 1, fMaxSize, fFid);
-  } else {
-    // For non-seekable files (e.g., pipes), call "read()" rather than "fread()", to ensure that the read doesn't block:
-    fFrameSize = read(fileno(fFid), fTo, fMaxSize);
-  }
-#endif
+
+  fFrameSize = read(fFid, fTo, fMaxSize);
   if (fFrameSize == 0) {
     handleClosure();
     return;
   }
-  fNumBytesToStream -= fFrameSize;
 
   // Set the 'presentation time':
   if (fPlayTimePerFrame > 0 && fPreferredFrameSize > 0) {

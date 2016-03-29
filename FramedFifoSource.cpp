@@ -22,7 +22,7 @@ along with this library; if not, write to the Free Software Foundation, Inc.,
 
 ////////// FramedFifoSource //////////
 
-FramedFifoSource::FramedFifoSource(UsageEnvironment& env, FILE* fid)
+FramedFifoSource::FramedFifoSource(UsageEnvironment& env, int fid)
   : FramedSource(env), fFid(fid) {
 }
 
