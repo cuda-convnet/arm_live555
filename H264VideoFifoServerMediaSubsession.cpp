@@ -21,7 +21,7 @@ along with this library; if not, write to the Free Software Foundation, Inc.,
 
 #include "H264VideoFifoServerMediaSubsession.hh"
 #include "H264VideoRTPSink.hh"
-#include "ByteStreamFileSource.hh"
+#include "ByteStreamFifoSource.hh"
 #include "H264VideoStreamFramer.hh"
 
 H264VideoFifoServerMediaSubsession*
@@ -33,7 +33,7 @@ H264VideoFifoServerMediaSubsession::createNew(UsageEnvironment& env,
 
 H264VideoFifoServerMediaSubsession::H264VideoFifoServerMediaSubsession(UsageEnvironment& env,
 								       char const* fileName, Boolean reuseFirstSource)
-  : FileServerMediaSubsession(env, fileName, reuseFirstSource),
+  : FifoServerMediaSubsession(env, fileName, reuseFirstSource),
     fAuxSDPLine(NULL), fDoneFlag(0), fDummyRTPSink(NULL) {
 }
 
@@ -103,9 +103,8 @@ FramedSource* H264VideoFifoServerMediaSubsession::createNewStreamSource(unsigned
   estBitrate = 500; // kbps, estimate
 
   // Create the video source:
-  ByteStreamFileSource* fileSource = ByteStreamFileSource::createNew(envir(), fFileName);
+  ByteStreamFifoSource* fileSource = ByteStreamFifoSource::createNew(envir(), fFileName);
   if (fileSource == NULL) return NULL;
-  fFileSize = fileSource->fileSize();
 
   // Create a framer for the Video Elementary Stream:
   return H264VideoStreamFramer::createNew(envir(), fileSource);

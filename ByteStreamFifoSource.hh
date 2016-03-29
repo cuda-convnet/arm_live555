@@ -22,10 +22,10 @@ along with this library; if not, write to the Free Software Foundation, Inc.,
 #define _BYTE_STREAM_FIFO_SOURCE_HH
 
 #ifndef _FRAMED_FILE_SOURCE_HH
-#include "FramedFileSource.hh"
+#include "FramedFifoSource.hh"
 #endif
 
-class ByteStreamFifoSource: public FramedFileSource {
+class ByteStreamFifoSource: public FramedFifoSource {
 public:
   static ByteStreamFifoSource* createNew(UsageEnvironment& env,
 					 char const* fileName,
@@ -40,9 +40,6 @@ public:
 					 unsigned playTimePerFrame = 0);
       // an alternative version of "createNew()" that's used if you already have
       // an open file.
-
-  u_int64_t fileSize() const { return fFileSize; }
-      // 0 means zero-length, unbounded, or unknown
 
   void seekToByteAbsolute(u_int64_t byteNumber, u_int64_t numBytesToStream = 0);
     // if "numBytesToStream" is >0, then we limit the stream to that number of bytes, before treating it as EOF
@@ -65,9 +62,6 @@ private:
   // redefined virtual functions:
   virtual void doGetNextFrame();
   virtual void doStopGettingFrames();
-
-protected:
-  u_int64_t fFileSize;
 
 private:
   unsigned fPreferredFrameSize;

@@ -23,10 +23,10 @@ along with this library; if not, write to the Free Software Foundation, Inc.,
 #define _H264_VIDEO_FIFO_SERVER_MEDIA_SUBSESSION_HH
 
 #ifndef _FILE_SERVER_MEDIA_SUBSESSION_HH
-#include "FileServerMediaSubsession.hh"
+#include "FifoServerMediaSubsession.hh"
 #endif
 
-class H264VideoFifoServerMediaSubsession: public FileServerMediaSubsession {
+class H264VideoFifoServerMediaSubsession: public FifoServerMediaSubsession {
 public:
   static H264VideoFifoServerMediaSubsession*
   createNew(UsageEnvironment& env, char const* fileName, Boolean reuseFirstSource);

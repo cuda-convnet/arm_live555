@@ -27,13 +27,13 @@ along with this library; if not, write to the Free Software Foundation, Inc.,
 ByteStreamFifoSource*
 ByteStreamFifoSource::createNew(UsageEnvironment& env, char const* fileName,
 				unsigned preferredFrameSize,
-				unsigned playTimePerFrame) {
+				unsigned playTimePerFrame)
+{
   FILE* fid = OpenInputFile(env, fileName);
   if (fid == NULL) return NULL;
 
   ByteStreamFifoSource* newSource
     = new ByteStreamFifoSource(env, fid, preferredFrameSize, playTimePerFrame);
-  newSource->fFileSize = GetFileSize(fileName, fid);
 
   return newSource;
 }
@@ -45,7 +45,6 @@ ByteStreamFifoSource::createNew(UsageEnvironment& env, FILE* fid,
   if (fid == NULL) return NULL;
 
   ByteStreamFifoSource* newSource = new ByteStreamFifoSource(env, fid, preferredFrameSize, playTimePerFrame);
-  newSource->fFileSize = GetFileSize(NULL, fid);
 
   return newSource;
 }
@@ -71,7 +70,7 @@ void ByteStreamFifoSource::seekToEnd() {
 ByteStreamFifoSource::ByteStreamFifoSource(UsageEnvironment& env, FILE* fid,
 					   unsigned preferredFrameSize,
 					   unsigned playTimePerFrame)
-  : FramedFileSource(env, fid), fFileSize(0), fPreferredFrameSize(preferredFrameSize),
+  : FramedFifoSource(env, fid), fPreferredFrameSize(preferredFrameSize),
     fPlayTimePerFrame(playTimePerFrame), fLastPlayTime(0),
     fHaveStartedReading(False), fLimitNumBytesToStream(False), fNumBytesToStream(0) {
 #ifndef READ_FROM_FILES_SYNCHRONOUSLY
