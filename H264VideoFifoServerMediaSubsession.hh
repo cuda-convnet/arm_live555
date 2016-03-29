@@ -22,7 +22,7 @@ along with this library; if not, write to the Free Software Foundation, Inc.,
 #ifndef _H264_VIDEO_FIFO_SERVER_MEDIA_SUBSESSION_HH
 #define _H264_VIDEO_FIFO_SERVER_MEDIA_SUBSESSION_HH
 
-#ifndef _FILE_SERVER_MEDIA_SUBSESSION_HH
+#ifndef _FIFO_SERVER_MEDIA_SUBSESSION_HH
 #include "FifoServerMediaSubsession.hh"
 #endif
 

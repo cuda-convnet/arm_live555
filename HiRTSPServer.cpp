@@ -39,9 +39,9 @@ HIRTSPServer::HIRTSPServer(UsageEnvironment& env, int ourSocket,
 				     UserAuthenticationDatabase* authDatabase, unsigned reclamationTestSeconds)
   : RTSPServerSupportingHTTPStreaming(env, ourSocket, ourPort, authDatabase, reclamationTestSeconds)
   {
-/*     this->cmdFifo=new CmdFifo();
+ 	this->cmdFifo=new CmdFifo();
 	this->cmdFifo->writeSetupCmd();
-	this->cmdFifo->writePlayCmd(0); */
+	this->cmdFifo->writePlayCmd(0); 
   }
 
 HIRTSPServer::~HIRTSPServer() {
