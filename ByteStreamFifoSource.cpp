@@ -19,7 +19,7 @@ along with this library; if not, write to the Free Software Foundation, Inc.,
 // Implementation
 
 #include "ByteStreamFifoSource.hh"
-#include "InputFile.hh"
+#include "InputFifo.hh"
 #include "GroupsockHelper.hh"
 
 ////////// ByteStreamFifoSource //////////
@@ -29,7 +29,7 @@ ByteStreamFifoSource::createNew(UsageEnvironment& env, char const* fileName,
 				unsigned preferredFrameSize,
 				unsigned playTimePerFrame)
 {
-  FILE* fid = OpenInputFile(env, fileName);
+  FILE* fid = OpenInputFifo(env, fileName);
   if (fid == NULL) return NULL;
 
   ByteStreamFifoSource* newSource
@@ -88,7 +88,7 @@ ByteStreamFifoSource::~ByteStreamFifoSource() {
   envir().taskScheduler().turnOffBackgroundReadHandling(fileno(fFid));
 #endif
 
-  CloseInputFile(fFid);
+  CloseInputFifo(fFid);
 }
 
 void ByteStreamFifoSource::doGetNextFrame() {
