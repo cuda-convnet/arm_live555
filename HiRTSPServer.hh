@@ -35,7 +35,8 @@ public:
   static HIRTSPServer* createNew(UsageEnvironment& env, Port ourPort,
 				      UserAuthenticationDatabase* authDatabase,
 				      unsigned reclamationTestSeconds = 65);
-
+protected: // redefined virtual functions
+  virtual ClientConnection* createNewClientConnection(int clientSocket, struct sockaddr_in clientAddr);
 protected:
   HIRTSPServer(UsageEnvironment& env, int ourSocket, Port ourPort,
 		    UserAuthenticationDatabase* authDatabase, unsigned reclamationTestSeconds);
@@ -47,6 +48,20 @@ protected: // redefined virtual functions
   lookupServerMediaSession(char const* streamName, Boolean isFirstLookupInSession);
   CmdFifo* cmdFifo;
 
+public:
+		class HiRTSPClientConnection:public RTSPServerSupportingHTTPStreaming::RTSPClientConnectionSupportingHTTPStreaming
+	{
+		friend class HIRTSPServer;
+		protected:
+		HiRTSPClientConnection(RTSPServer& ourServer, int clientSocket, struct sockaddr_in clientAddr);
+		virtual ~HiRTSPClientConnection();
+		
+	};
+	  class HiRTSPClientSession: public RTSPServer::RTSPClientSession {
+		protected:
+			HiRTSPClientSession(RTSPServer& ourServer, u_int32_t sessionId);
+		virtual ~HiRTSPClientSession();
+	  };
 };
 
 #endif

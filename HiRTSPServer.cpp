@@ -40,12 +40,12 @@ HIRTSPServer::HIRTSPServer(UsageEnvironment& env, int ourSocket,
   : RTSPServerSupportingHTTPStreaming(env, ourSocket, ourPort, authDatabase, reclamationTestSeconds)
   {
  	this->cmdFifo=new CmdFifo();
-	this->cmdFifo->writeSetupCmd();
-	this->cmdFifo->writePlayCmd(0); 
+ 	this->cmdFifo->writeSetupCmd();
+	this->cmdFifo->writePlayCmd(0);  
   }
 
 HIRTSPServer::~HIRTSPServer() {
-/*     delete this->cmdFifo; */
+     delete this->cmdFifo; 
 }
 
 static ServerMediaSession* createNewSMS(UsageEnvironment& env,
@@ -115,3 +115,28 @@ static ServerMediaSession* createNewSMS(UsageEnvironment& env,
 
   return sms;
 }
+/********************************HiRTSPClientConnection*************************/
+GenericMediaServer::ClientConnection*
+HIRTSPServer::createNewClientConnection(int clientSocket, struct sockaddr_in clientAddr) {
+  return new HiRTSPClientConnection(*this, clientSocket, clientAddr);
+}
+HIRTSPServer::HiRTSPClientConnection
+::HiRTSPClientConnection(RTSPServer& ourServer, int clientSocket, struct sockaddr_in clientAddr)
+  : RTSPClientConnectionSupportingHTTPStreaming(ourServer, clientSocket, clientAddr) {
+	  printf("Create HiRTSPClientConnection .\n");
+}
+HIRTSPServer::HiRTSPClientConnection::~HiRTSPClientConnection() {
+
+}
+/********************************HiRTSPClientSession*************************/
+HIRTSPServer::HiRTSPClientSession
+::HiRTSPClientSession(RTSPServer& ourServer, u_int32_t sessionId)
+  : RTSPServer::RTSPClientSession(ourServer, sessionId) {
+	  printf("Create HiRTSPClientSession .\n");
+}
+
+HIRTSPServer::HiRTSPClientSession::~HiRTSPClientSession() {
+  
+}
+
+
